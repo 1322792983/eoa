@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.situ.eoa.student.dao.StudentDao">
+
+	<sql id="student_base_select">
+		SELECT ROW_ID,CLAZZ_ID,STU_CODE,STU_NAME,STU_SEX,STU_BIRTHDAY,ACTIVE_FLAG,CREATE_BY,CREATE_DATE,UPDATE_BY,UPDATE_DATE FROM TB_STUDENT WHERE ACTIVE_FLAG = 1
+	</sql>
+
+	<insert id="save" parameterType="Student" useGeneratedKeys="true" keyColumn="ROW_ID" keyProperty="rowId">
+		INSERT INTO TB_STUDENT (CLAZZ_ID,STU_CODE,STU_NAME,STU_SEX,STU_BIRTHDAY,ACTIVE_FLAG,CREATE_BY,CREATE_DATE)
+		VALUES(#{clazzId},#{stuCode},#{stuName},#{stuSex},#{stuBirthday},#{activeFlag},#{createBy},#{createDate})
+	</insert>
+	
+	<update id="update" parameterType="Student">
+		UPDATE TB_STUDENT 
+		<set>
+			<if test="clazzId!=null">
+				CLAZZ_ID = #{clazzId},
+			</if>
+			<if test="stuCode!=null">
+				STU_CODE = #{stuCode},
+			</if>
+			<if test="stuName!=null">
+				STU_NAME = #{stuName},
+			</if>
+			<if test="stuSex!=null">
+				STU_SEX = #{stuSex},
+			</if>
+			<if test="stuBirthday!=null">
+				STU_BIRTHDAY = #{stuBirthday},
+			</if>
+			<if test="updateBy!=null">
+				UPDATE_BY = #{updateBy},
+			</if>
+			<if test="updateDate!=null">
+				UPDATE_DATE = #{updateDate},
+			</if>
+		</set>
+		WHERE ROW_ID = #{rowId}
+	</update>
+		
+	<!-- 逻辑删除 -->
+	<update id="delete" parameterType="Student" >
+		UPDATE TB_STUDENT SET ACTIVE_FLAG=0 WHERE ROW_ID = #{rowId}
+	</update>
+	
+	<!-- <delete id="delete">
+		DELETE FROM TB_CLAZZ WHERE ROW_ID = #{rowId}
+	</delete> -->
+	
+	<select id="get" resultType="Student">
+		<include refid="student_base_select"/> AND ROW_ID = #{rowId}
+	</select>
+	
+	<select id="find" resultType="Student">
+		<include refid="student_base_select"/>
+	</select>
+	
+	<select id="selectByView" parameterType="Student" resultType="Student">
+		<include refid="student_base_select"/>
+			<if test="clazzId!=null and !''.equals(clazzId)">
+				AND CLAZZ_ID = #{clazzId}
+			</if>
+			<if test="stuCode!=null and !''.equals(stuCode)">
+				AND STU_CODE = #{stuCode}
+			</if>
+			<if test="stuName!=null and !''.equals(stuName)">
+				AND STU_NAME = #{stuName}
+			</if>
+			<if test="stuSex!=null and !''.equals(stuSex)">
+				AND STU_SEX = #{stuSex}
+			</if>
+			<if test="stuBirthday!=null and !''.equals(stuBirthday)">
+				AND STU_BIRTHDAY = #{stuBirthday}
+			</if>
+			<if test="updateBy!=null and !''.equals(updateBy)">
+				AND UPDATE_BY = #{updateBy}
+			</if>
+			<if test="updateDate!=null and !''.equals(updateDate)">
+				AND UPDATE_DATE = #{updateDate}
+			</if>
+	</select>
+	
+	<select id="getByCode" resultType="Student" parameterType="Student">
+		<include refid="student_base_select"/>
+		AND STU_CODE = #{stuCode}
+	</select>
+	
+	<select id="findByPage" resultType="Student">
+		<include refid="student_base_select"/>
+		<include refid="search_sql"></include>
+		 LIMIT #{firstResult},#{maxResults}
+	</select>
+	
+	<select id="getCount" resultType="java.lang.Integer">
+		SELECT COUNT(ROW_ID) FROM TB_STUDENT WHERE ACTIVE_FLAG =1
+		<include refid="search_sql"></include>
+	</select>
+	<sql id="search_sql">
+		<if test="searchStu!=null">
+			<if test="searchStu.stuCode!=null and searchStu.stuCode!=''">
+				AND STU_CODE = #{searchStu.stuCode}
+			</if>
+			<if test="searchStu.stuName!=null and searchStu.stuName!=''">
+				AND STU_NAME = #{searchStu.stuName}
+			</if>
+			<!-- !''.equals(searchStu.stuSex) -->
+			<if test="searchStu.stuSex!=null">
+				AND STU_SEX = #{searchStu.stuSex}
+			</if>
+		</if>
+	</sql>
+	
+</mapper>
